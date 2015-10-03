@@ -34,15 +34,36 @@ int main(void)
 		// 1) Fork child process using fork()
 		if (shouldrun) 
 		{
-			child = fork();          /* creates a duplicate process! */
+//			child = fork();          /* creates a duplicate process! */
 					// 2) the child process invoke execvp()
-					//
-					//
-					//
-					//
-					//
-					//
-					//
+		//	inputBuffer=args[0];
+			if (strncmp(inputBuffer, "ls",2) == 0)
+				execvp(args[0],args);
+
+	
+                        if (strncmp(args[0], "pwd", 4) == 0)
+
+                        {
+                                char * dir;
+                                getcwd(dir,get_current_dir_name());
+                                printf("%s",dir);
+                                printf("Here pwd");
+                        }
+
+
+                        if (strncmp(args[0],"cd",3)==0 && args[1] ==NULL)
+                             	printf("%s", getenv("HOME"));
+			if (strncmp(args[0],"cd",2)==0 && args[1] !=NULL)
+			{
+				chdir(args[1]);
+		                printf("%s", getenv("PWD"));
+			}
+
+
+
+
+
+
 		}
     }// end of while 
 	
@@ -58,13 +79,13 @@ int main(void)
 int Setup(char inputBuffer[], char *args[],int *background)
 {
 	int length,			/* # of characters in the command line */
-		i,				/* loop index for accessing inputBuffer array */
+		i,j,				/* loop index for accessing inputBuffer array */
 		start,			/* index where beginning of next command parameter is */
 		ct,				/* index of where to place the next parameter into args[] */
 		command_number;	/* index of requested command number */
-
+	char temp[MAX_LINE];
 	ct = 0;
-
+	
 	/* read what the user enters on the command line */
 	do 
 	{
@@ -98,15 +119,40 @@ int Setup(char inputBuffer[], char *args[],int *background)
 	/**
 	 * Parse the contents of inputBuffer
 	 */
+	start =0;
+	int end =0;
 	for (i=0;i<length;i++) 
 	{ 
+		
 		/* examine every character in the inputBuffer */
-
-
-
-
+		if((int)inputBuffer[i]==' '|| (int)inputBuffer[i]=='>')
+		{
+			
+			if((int)inputBuffer[i]=='>')
+				args[ct++]=strdup(">");
+		
+			else
+			{
+				
+				for(j=0;j<end-start;j++)
+					temp[j]=inputBuffer[start+j];
+				temp[end-start]=0;	
+				args[ct++]=strdup(temp);
+				
+				start=end;
+			}
+		}
+		
+		end++;
 	}    /* end of for */
-
+	printf("%s",inputBuffer);
+	for(j=0;j<end-start;j++)  //for the last element
+       		temp[j]=inputBuffer[start+j];	
+	temp[end-start]=0; // Null terminate
+	args[ct++]=strdup(temp);
+	printf("%s is in temp\n",temp);
+	args[ct]=NULL;
+	
 	/**
 	 * If we get &, don't enter it in the args array
 	 */
@@ -114,7 +160,7 @@ int Setup(char inputBuffer[], char *args[],int *background)
 	if (*background)
 		args[--ct] = NULL;
 
-	args[ct] = NULL; /* just in case the input line was > 512 */
+//	args[ct] = NULL; /* just in case the input line was > 512 */
 
 	return 1;
 
