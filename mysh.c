@@ -34,33 +34,34 @@ int main(void)
 		// 1) Fork child process using fork()
 		if (shouldrun) 
 		{
-//			child = fork();          /* creates a duplicate process! */
-					// 2) the child process invoke execvp()
-		//	inputBuffer=args[0];
-			if (strncmp(inputBuffer, "ls",2) == 0)
-				execvp(args[0],args);
-
-	
-                        if (strncmp(args[0], "pwd", 4) == 0)
-
-                        {
-                                char * dir;
-                                getcwd(dir,get_current_dir_name());
-                                printf("%s",dir);
-                                printf("Here pwd");
-                        }
-
-
-                        if (strncmp(args[0],"cd",3)==0 && args[1] ==NULL)
-                             	printf("%s", getenv("HOME"));
-			if (strncmp(args[0],"cd",2)==0 && args[1] !=NULL)
+			child = fork();          /* creates a duplicate process! */
+				// 2) the child process invoke execvp()
+			if(child==0)
 			{
-				chdir(args[1]);
-		                printf("%s", getenv("PWD"));
+				if (strncmp(inputBuffer, "ls",2) == 0)
+					execvp("ls",args);
+	
+	                        if (strncmp(inputBuffer, "pwd", 3) == 0)
+
+        	                {
+                	                char * dir;
+                        	        getcwd(dir,get_current_dir_name());
+                                	printf("%s\n",dir);
+                               
+                        	}
+
+
+                        	if (strncmp(inputBuffer,"cd",2)==0 && args[1] ==NULL)
+                             		printf("%s\n", getenv("HOME"));
+				if (strncmp(inputBuffer,"cd",2)==0 && args[1] !=NULL)
+				{
+					chdir(args[1]);
+			                printf("%s\n", getenv("PWD"));
+				}
+	
 			}
-
-
-
+			else
+				wait(NULL);
 
 
 
@@ -137,7 +138,7 @@ int Setup(char inputBuffer[], char *args[],int *background)
 				for(j=0;j<end-start;j++)
 					temp[j]=inputBuffer[start+j];
 				temp[end-start]=0;	
-				args[ct++]=strdup(temp);
+				args[ct++]=strndup(temp,(end-start));
 				
 				start=end;
 			}
@@ -145,12 +146,13 @@ int Setup(char inputBuffer[], char *args[],int *background)
 		
 		end++;
 	}    /* end of for */
-	printf("%s",inputBuffer);
+
 	for(j=0;j<end-start;j++)  //for the last element
        		temp[j]=inputBuffer[start+j];	
 	temp[end-start]=0; // Null terminate
-	args[ct++]=strdup(temp);
-	printf("%s is in temp\n",temp);
+	
+	args[ct++]=strndup(temp,(end-start));
+	
 	args[ct]=NULL;
 	
 	/**
