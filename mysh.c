@@ -20,7 +20,7 @@ int main(void)
 	int status;           			/* result from execvp system call*/
 	int shouldrun = 1;
 	pid_t child;            		/* process id of the child process */
-	
+	char error_message[30] = "An error has occurred\n";
 	int i, upper;
 	/* Program terminates normally inside Setup */
     while (shouldrun)
@@ -36,35 +36,59 @@ int main(void)
 		{
 			child = fork();          /* creates a duplicate process! */
 				// 2) the child process invoke execvp()
-			if(child==0)
+			if(child<0)			
+				write(STDERR_FILENO, error_message, strlen(error_message));
+
+			else if(child==0)
 			{
 				if (strncmp(inputBuffer, "ls",2) == 0)
+				{
 					execvp("ls",args);
-	
-	                        if (strncmp(inputBuffer, "pwd", 3) == 0)
+					write(STDERR_FILENO, error_message, strlen(error_message));
+					exit(127);
+				}
+	                        else if (strncmp(inputBuffer, "pwd", 3) == 0)
 
         	                {
-                	                char * dir;
+                	                char * dir=malloc(40);
                         	        getcwd(dir,get_current_dir_name());
                                 	printf("%s\n",dir);
-                               
+					free(dir);
+                              		exit(0); 
                         	}
 
-
-                        	if (strncmp(inputBuffer,"cd",2)==0 && args[1] ==NULL)
-                             		printf("%s\n", getenv("HOME"));
-				if (strncmp(inputBuffer,"cd",2)==0 && args[1] !=NULL)
+	                       	else if (strncmp(inputBuffer,"cd",2)==0 && args[1] ==NULL)
 				{
-					chdir(args[1]);
-			                printf("%s\n", getenv("PWD"));
+                           		printf("%s\n", getenv("HOME"));
+					exit(0);
 				}
-	
+				else if (strncmp(inputBuffer,"cd",2)==0 && args[1] !=NULL)
+				{
+					int ret;
+					ret=chdir(args[1]);
+					if(ret==-1)
+					{
+						write(STDERR_FILENO, error_message, strlen(error_message));
+						exit(127);
+					}
+					else
+					{
+			        	        printf("%s\n", getenv("PWD"));
+						exit(0);
+					}
+				}
+				else
+				{
+					write(STDERR_FILENO, error_message, strlen(error_message));
+					exit(127);
+				}
 			}
-			else
+			else 
+			{
 				wait(NULL);
+			
 
-
-
+			}
 		}
     }// end of while 
 	
@@ -122,16 +146,21 @@ int Setup(char inputBuffer[], char *args[],int *background)
 	 */
 	start =0;
 	int end =0;
+	if (inputBuffer[length-1]='\n')
+		inputBuffer[length-1]=0;
 	for (i=0;i<length;i++) 
 	{ 
-		
+		if((int)inputBuffer[i]=='&')
+		{
+			args[ct++]=strdup("&");	 		
+			background =0;
+		}
 		/* examine every character in the inputBuffer */
 		if((int)inputBuffer[i]==' '|| (int)inputBuffer[i]=='>')
 		{
 			
 			if((int)inputBuffer[i]=='>')
 				args[ct++]=strdup(">");
-		
 			else
 			{
 				
@@ -143,7 +172,8 @@ int Setup(char inputBuffer[], char *args[],int *background)
 				start=end;
 			}
 		}
-		
+
+
 		end++;
 	}    /* end of for */
 
