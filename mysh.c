@@ -55,13 +55,13 @@ int main(void)
                         	        getcwd(dir,get_current_dir_name());
                                 	printf("%s\n",dir);
 					free(dir);
-                              		exit(0); 
+
                         	}
 
 	                       	else if (strncmp(inputBuffer,"cd",2)==0 && args[1] ==NULL)
 				{
                            		printf("%s\n", getenv("HOME"));
-					exit(0);
+
 				}
 				else if (strncmp(inputBuffer,"cd",2)==0 && args[1] !=NULL)
 				{
@@ -75,7 +75,7 @@ int main(void)
 					else
 					{
 			        	        printf("%s\n", getenv("PWD"));
-						exit(0);
+
 					}
 				}
 				else
@@ -83,6 +83,7 @@ int main(void)
 					write(STDERR_FILENO, error_message, strlen(error_message));
 					exit(127);
 				}
+				exit(0);
 			}
 			else 
 			{
