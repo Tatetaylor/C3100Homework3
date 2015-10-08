@@ -41,9 +41,10 @@ int main(void)
 
 			else if(child==0)
 			{
+
 				if (strncmp(inputBuffer, "ls",2) == 0)
 				{
-					execvp("ls",args);
+					execvp(args[0],args);
 					write(STDERR_FILENO, error_message, strlen(error_message));
 					exit(127);
 				}
@@ -169,7 +170,7 @@ int Setup(char inputBuffer[], char *args[],int *background)
 				temp[end-start]=0;	
 				args[ct++]=strndup(temp,(end-start));
 				
-				start=end;
+				start=(end+1);
 			}
 		}
 
